@@ -21,6 +21,11 @@ type CustomerOrder = {
   note: string
 }
 
+type Location = {
+  name: string
+  closeRank: Country[]
+}
+
 const warehouses: Warehouse[] = [
   {
     name: 'HK',
@@ -59,7 +64,7 @@ const testOrders = [
     destination: 'HK',
     items: ['🍇', '🍎'],
     shipments: [],
-    note: '...', // TODO: Write your test order and explain the expected result.
+    note: 'Expect 1 shipment from JP and 1 from HK, because it is the closest warehouse compare to US, and other from the same continent',
   },
   // TODO: Create more test orders if needed
   {
@@ -88,12 +93,12 @@ const locations = [
 
 const preferedHouse = (destination: Country, item: Item): Warehouse => {
   console.log(destination, item)
-  const l = locations.find((x) => x.name === destination)
+  const l = locations.find((x: Location) => x.name === destination)
   let warehouse = warehouses[0]
   if (l) {
     for (let i = 0; i < l.closeRank.length; i++) {
       const location = l.closeRank[i]
-      const w = warehouses.find((x) => location === x.name)
+      const w = warehouses.find((x: Warehouse) => location === x.name)
       if (w && w.items.includes(item)) {
         warehouse = w
         break
@@ -108,7 +113,7 @@ const yourAlgo = function (order: CustomerOrder): Shipment[] {
   const shipments: Shipment[] = []
 
   // Move item from warehouse to shipment
-  order.items.forEach((item) => {
+  order.items.forEach((item: Item) => {
     // TODO: Select the *best* warehouse
     const warehouse = preferedHouse(order.destination, item)
     const i = warehouse.items.indexOf(item)
@@ -118,7 +123,9 @@ const yourAlgo = function (order: CustomerOrder): Shipment[] {
       console.log(pickFromWarehouse)
 
       // TODO: One item per shipment is silly, fix me.
-      const index = shipments.findIndex((x) => x.fromWarehouse === warehouse)
+      const index = shipments.findIndex(
+        (x: Shipment) => x.fromWarehouse === warehouse,
+      )
       if (index !== -1) {
         shipments[index].items.push(pickFromWarehouse)
       } else {
@@ -135,8 +142,6 @@ const yourAlgo = function (order: CustomerOrder): Shipment[] {
 }
 
 function Ship() {
-  const [warehouseList, setWarehouseList] =
-    React.useState<Warehouse[]>(warehouses)
   const [shipments, setShipments] = React.useState<Shipment[]>([])
   const [calculatedOrder, setCalculatedOrder] = React.useState<string>('')
 
@@ -151,7 +156,7 @@ function Ship() {
       <div id="the-app" className="columns is-mobile block">
         <div className="column">
           <h2 className="title is-4">Warehouses</h2>
-          {warehouseList.map((warehouse: Warehouse) => (
+          {warehouses.map((warehouse: Warehouse) => (
             <div key={warehouse.name} className="card block">
               <header className="card-header">
                 <div className="card-header-title">
